@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+    
+<hibernate-configuration>
+	<session-factory>
+	<property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+	<property name="connection.url">jdbc:mysql://localhost/photoshare</property>
+	<property name="connection.username">photoshare</property>
+	<property name="connection.password">photoShare123</property>
+	
+	<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+	
+	<property name="current_session_context_class">thread</property>
+	<property name="hibernate.hbm2ddl.auto">create</property>
+	
+	<mapping class="com.photoshare.model.Album"/>
+	<mapping class="com.photoshare.model.PhotoMeta"/>
+	<mapping class="com.photoshare.model.User"/>
+	 
+	</session-factory>
+</hibernate-configuration>
