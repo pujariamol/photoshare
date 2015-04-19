@@ -19,6 +19,8 @@
 	<mapping class="com.photoshare.model.Album"/>
 	<mapping class="com.photoshare.model.PhotoMeta"/>
 	<mapping class="com.photoshare.model.User"/>
+	<mapping class="com.photoshare.model.AlbumSharedUsers"/>
+	<mapping class="com.photoshare.model.Comment"/> 
 	 
 	</session-factory>
 </hibernate-configuration>
