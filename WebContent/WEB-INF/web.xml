@@ -8,6 +8,12 @@
       <param-name>com.sun.jersey.config.property.packages</param-name>
       <param-value>com.photoshare</param-value>
     </init-param>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  
+  <servlet>
+    <servlet-name>photoshare-startup</servlet-name>
+    <servlet-class>com.photoshare.utility.PhotoshareStartup</servlet-class>
     <load-on-startup>1</load-on-startup>
   </servlet>
   

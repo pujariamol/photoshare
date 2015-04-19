@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import com.photoshare.db.HibernateUtil;
@@ -20,10 +21,6 @@ public class PhotoServices {
 	@POST
 	@Produces(MediaType.TEXT_PLAIN)
 	public String addPhoto() {
-		HibernateUtil hibernateUtil = new HibernateUtil();
-		Session session = hibernateUtil.getSession();
-//		Transaction tx = session.getTransaction();
-//		tx.begin();
 		
 		return "test";
 	}
