@@ -10,6 +10,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 
+/**
+ * @author Amol
+ *
+ * provides services related to users
+ *
+ */
 @Path("/users")
 public class UserServices {
 

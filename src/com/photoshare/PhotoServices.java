@@ -1,5 +1,7 @@
 package com.photoshare;
 
+import java.util.Date;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -9,18 +11,42 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
+import com.photoshare.dao.PhotoDAO;
+import com.photoshare.model.PhotoMeta;
 
-import com.photoshare.db.HibernateUtil;
-
+/**
+ * @author Amol
+ * 
+ * Photoservice provides all services related to photos
+ *
+ */
 @Path("/photos")
 public class PhotoServices {
 
 	@POST
 	@Produces(MediaType.TEXT_PLAIN)
 	public String addPhoto() {
+		PhotoDAO photoDAO = new PhotoDAO();
+
+		PhotoMeta photo = new PhotoMeta();
+		photo.setName("Test pic");
+		photo.setDate(new Date());
+		photo.setLocation("San Jose");
+		photo.setDescription("Test description");
+		
+		photoDAO.insert(photo);
+		System.out.println("---------------------------successfully inserted");
+		
+		photo.setDescription("---------------------------Description changed");
+		photoDAO.update(photo);
+		System.out.println("---------------------------successfully updated");
+		
+		PhotoMeta rPhoto = photoDAO.getObject(PhotoMeta.class, 1);
+		
+		System.out.println("---------------------------Name = " + rPhoto.getName() + "\n Description = " + rPhoto.getDescription() );
+		
+		photoDAO.delete(rPhoto);
+		System.out.println("---------------------------Record deleted successfully");
 		
 		return "test";
 	}

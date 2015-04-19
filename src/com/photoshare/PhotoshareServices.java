@@ -4,6 +4,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
+/**
+ * @author Amol
+ * 
+ * provides services related to the photosharing application
+ */
 @Path("/photoshare")
 public class PhotoshareServices {
 

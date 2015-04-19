@@ -10,6 +10,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 
+/**
+ * @author Amol
+ *
+ * Provides services related to album
+ */
 @Path("/albums")
 public class AlbumServices {
 
