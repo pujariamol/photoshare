@@ -14,7 +14,6 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/mysql-connector-java-5.0.8-bin.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javassist-3.18.1-GA.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/servlet.jar"/>
-	<classpathentry kind="lib" path="jersey-multipart-1.18.jar"/>
 	<classpathentry kind="lib" path="mimepull-1.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.core.runtimeTarget/J2EE Runtime Library">
 		<attributes>
@@ -26,5 +25,7 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/Users/maheshbingi/Documents/MS/Spring15/277/Project/SourceCode/WebContent/WEB-INF/lib/jersey-multipart-1.19.jar"/>
+	<classpathentry kind="lib" path="/Users/maheshbingi/Documents/MS/Spring15/277/Project/SourceCode/WebContent/WEB-INF/lib/org-json.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
