@@ -11,7 +11,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 
+
+
+@XmlRootElement
 @Entity
 @Table(name = "ALBUM")
 public class Album {
@@ -37,6 +41,7 @@ public class Album {
 	private String coverPhotoURL;
 
 	@OneToMany(mappedBy = "album")
+	//@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
 	private List<PhotoMeta> photos;
 
 	@ManyToOne
