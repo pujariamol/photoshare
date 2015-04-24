@@ -12,5 +12,16 @@ import com.photoshare.model.User;
  * 
  */
 public class UserDAO extends CommonDAO<User, Integer> {
+	private static UserDAO instance = null;
 
+	private UserDAO() {
+		super();
+	}
+
+	public static UserDAO getInstance() {
+		if (instance == null) {
+			instance = new UserDAO();
+		}
+		return instance;
+	}
 }

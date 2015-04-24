@@ -12,5 +12,17 @@ import com.photoshare.model.Comment;
  * 
  */
 public class CommentDAO extends CommonDAO<Comment, Integer> {
+	private static CommentDAO instance = null;
+
+	private CommentDAO() {
+		super();
+	}
+
+	public static CommentDAO getInstance() {
+		if (instance == null) {
+			instance = new CommentDAO();
+		}
+		return instance;
+	}
 
 }
