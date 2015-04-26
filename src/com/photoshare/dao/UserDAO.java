@@ -1,5 +1,8 @@
 package com.photoshare.dao;
 
+import javassist.tools.rmi.ObjectNotFoundException;
+
+import com.photoshare.model.Album;
 import com.photoshare.model.User;
 
 /**
@@ -24,4 +27,20 @@ public class UserDAO extends CommonDAO<User, Integer> {
 		}
 		return instance;
 	}
+	
+	
+	public User getUserById(int id) {
+		return getObject(User.class, id);
+	}
+	
+	public void deleteUser(User user) throws ObjectNotFoundException {
+		int id = user.getId();
+		user = getUserById(id);
+		if (user == null) {
+			throw new ObjectNotFoundException("The user with " + id
+					+ " id does not exists!!");
+		}
+		delete(user);
+	}
+	
 }

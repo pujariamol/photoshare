@@ -11,23 +11,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @Entity
-@Table(name="ALBUM_SHARED_USERS")
+@Table(name = "ALBUM_SHARED_USERS")
 public class AlbumSharedUsers {
 
 	@Id
 	@GeneratedValue
-	@Column(name="ID")
+	@Column(name = "ID")
 	private int id;
-	
+
 	@ManyToOne
-	@JoinColumn(name="ALBUM_ID")
+	@JoinColumn(name = "ALBUM_ID")
 	private Album album;
-	
-	@Column(name="FRIENDS_EMAIL_ID")
+
+	@Column(name = "FRIENDS_EMAIL_ID")
 	private String friendsEmailId;
-	
-	@Column(name="ACCESS_LEVEL")
+
+	@Column(name = "ACCESS_LEVEL")
 	private String accessLevel;
+
+	@ManyToOne
+	@JoinColumn(name = "USER_ID")
+	private User user;
 
 	public int getId() {
 		return id;
@@ -60,7 +64,13 @@ public class AlbumSharedUsers {
 	public void setAccessLevel(String accessLevel) {
 		this.accessLevel = accessLevel;
 	}
-	
-	
-	
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
 }

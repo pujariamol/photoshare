@@ -32,6 +32,7 @@ import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 import com.sun.jersey.multipart.FormDataParam;
 import com.photoshare.dao.PhotoDAO;
 import com.photoshare.dto.ResponseDTO;
+import com.photoshare.model.Comment;
 import com.photoshare.model.PhotoMeta;
 
 /**
@@ -194,6 +195,20 @@ public class PhotoServices {
 		}
 	}
 
+	
+	@POST
+	@Path("/{photoId}/comments/")
+	public Response addComment(@PathParam("photoId") int photoId, Comment comment){
+		
+		comment.setPhoto(photoDAO.getPhotoById(photoId));
+	
+			
+		ResponseBuilder res = new ResponseBuilderImpl();
+		res.status(201);
+		return res.build();
+	}
+	
+	
 	// save uploaded file to new location
 	private void writeToFile(InputStream uploadedInputStream,
 			String uploadedFileLocation) {

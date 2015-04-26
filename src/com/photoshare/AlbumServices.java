@@ -19,8 +19,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.photoshare.dao.AlbumDAO;
+import com.photoshare.dao.PhotoDAO;
 import com.photoshare.dto.ResponseDTO;
 import com.photoshare.model.Album;
+import com.photoshare.model.PhotoMeta;
 import com.photoshare.utility.Constants;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 
@@ -75,7 +77,6 @@ public class AlbumServices {
 		albumDAO.update(album);
 
 		ResponseBuilder res = new ResponseBuilderImpl();
-
 		res.status(200);
 		res.entity(
 				new ResponseDTO(true, Constants.ALBUM_UPDATED_SUCCESS)
@@ -109,5 +110,40 @@ public class AlbumServices {
 	public Album getAlbumInfo(@PathParam("albumId") int albumId) {
 		Album album = albumDAO.getAlbumById(albumId);
 		return album;
+	}
+	
+	
+	/**
+	 * [{
+	 * id : "1",
+	 * "name" : "photo1"
+	 * },{
+	 * 
+	 * }]
+	 * 
+	 * 
+	 * @param albumId
+	 * @param photoIds
+	 * @param photosList
+	 */
+	
+	@PUT
+	@Path("/{albumId}/photos/{photoId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response addPhotoToAlbum(@PathParam("albumId") int albumId,
+			@PathParam("photoIds") String photoIds, PhotoMeta photo) {
+		
+		System.out.println("--- " + photo.getName());
+		System.out.println("---" + photoIds);
+		
+		photo.setAlbum(albumDAO.getAlbumById(albumId));
+
+		PhotoDAO photoDao = PhotoDAO.getInstance();
+		photoDao.update(photo);
+		
+		ResponseBuilder res = new ResponseBuilderImpl();
+		res.status(200);
+		return res.build();
+		
 	}
 }

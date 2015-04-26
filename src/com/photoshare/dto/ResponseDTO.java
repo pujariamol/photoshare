@@ -1,7 +1,5 @@
 package com.photoshare.dto;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.json.JSONObject;
 
 /**

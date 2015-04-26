@@ -1,6 +1,8 @@
 package com.photoshare.model;
 
-import java.sql.Date;
+
+
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +18,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name="COMMENT")
 public class Comment {
 
+	public Comment(){
+		super();
+		
+		this.date = new Date();
+	}
+	
+	
 	@Id
 	@GeneratedValue
 	@Column(name="ID")
