@@ -14,26 +14,30 @@ import java.util.UUID;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.json.JSONException;
 
+import com.photoshare.bizlogic.AlbumBizLogic;
+import com.photoshare.dao.PhotoDAO;
+import com.photoshare.dto.ResponseDTO;
+import com.photoshare.model.Album;
+import com.photoshare.model.Comment;
+import com.photoshare.model.PhotoMeta;
 import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 import com.sun.jersey.multipart.FormDataParam;
-import com.photoshare.dao.PhotoDAO;
-import com.photoshare.dto.ResponseDTO;
-import com.photoshare.model.Comment;
-import com.photoshare.model.PhotoMeta;
 
 /**
  * @author Amol
@@ -52,8 +56,10 @@ public class PhotoServices {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response addPhoto(
 			@FormDataParam("file") InputStream uploadedInputStream,
-			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+			@FormDataParam("file") FormDataContentDisposition fileDetail,@QueryParam("albumId") int albumId) {
 
+		System.out.println("--------------------------------------"+ albumId);
+		
 		String uniqueFileName = UUID.randomUUID() + "."
 				+ fileDetail.getFileName().split("\\.")[1];
 		String uploadedFileLocation = uploadFileHomeLocation + uniqueFileName;
@@ -66,6 +72,11 @@ public class PhotoServices {
 		photo.setLocation(uploadedFileLocation);
 		photo.setURL(uploadedFileLocation);
 		photo.setDescription(fileDetail.getFileName().split("\\.")[0]);
+		
+		Album album = new AlbumBizLogic().getAlbumById(albumId);
+		
+		photo.setAlbum(album);
+		
 		photoDAO.insert(photo);
 
 		// save file to disk
@@ -208,7 +219,7 @@ public class PhotoServices {
 		return res.build();
 	}
 	
-	
+
 	// save uploaded file to new location
 	private void writeToFile(InputStream uploadedInputStream,
 			String uploadedFileLocation) {

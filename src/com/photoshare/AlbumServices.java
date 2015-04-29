@@ -18,12 +18,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import com.photoshare.bizlogic.AlbumBizLogic;
 import com.photoshare.dao.AlbumDAO;
 import com.photoshare.dao.PhotoDAO;
 import com.photoshare.dto.ResponseDTO;
 import com.photoshare.model.Album;
+import com.photoshare.model.PhotoList;
 import com.photoshare.model.PhotoMeta;
 import com.photoshare.utility.Constants;
+import com.photoshare.utility.Utility;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 
 /**
@@ -35,6 +38,7 @@ import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 public class AlbumServices {
 
 	private static AlbumDAO albumDAO = AlbumDAO.getInstance();
+	private static AlbumBizLogic albumBizLogic = new AlbumBizLogic();
 
 	/**
 	 * {name:'test',
@@ -46,23 +50,31 @@ public class AlbumServices {
 	 */
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response createAlbum(Album album) {
-		album.setDateOfCreation(new Date());
-		albumDAO.insert(album);
 
+		ResponseDTO responseDTO = new ResponseDTO();
 		ResponseBuilder res = new ResponseBuilderImpl();
 
-		res.status(201);
-		res.entity(
-				new ResponseDTO(true, Constants.ALBUM_CREATED_SUCCESS)
-						.toString()).type(MediaType.APPLICATION_JSON);
 		try {
+			albumBizLogic.createAlbum(album);
+			responseDTO.setMessage(Constants.ALBUM_CREATED_SUCCESS);
+			responseDTO.setSuccess(true);
+
 			URI createdURI = new URI("/albums/" + album.getId());
 			res.contentLocation(createdURI);
 		} catch (URISyntaxException e) {
+			responseDTO.setMessage(e.getMessage());
+			responseDTO.setSuccess(false);
+			e.printStackTrace();
+		} catch (Exception e) {
+			responseDTO.setMessage(e.getMessage());
+			responseDTO.setSuccess(false);
 			e.printStackTrace();
 		}
 
+		res.status(responseDTO.isSuccess() ? 201 : 500);
+		res.entity(responseDTO);
 		return res.build();
 	}
 
@@ -111,13 +123,9 @@ public class AlbumServices {
 		Album album = albumDAO.getAlbumById(albumId);
 		return album;
 	}
-	
-	
+
 	/**
-	 * [{
-	 * id : "1",
-	 * "name" : "photo1"
-	 * },{
+	 * [{ id : "1", "name" : "photo1" },{
 	 * 
 	 * }]
 	 * 
@@ -126,24 +134,44 @@ public class AlbumServices {
 	 * @param photoIds
 	 * @param photosList
 	 */
-	
+
 	@PUT
 	@Path("/{albumId}/photos/{photoId}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response addPhotoToAlbum(@PathParam("albumId") int albumId,
 			@PathParam("photoIds") String photoIds, PhotoMeta photo) {
-		
+
 		System.out.println("--- " + photo.getName());
 		System.out.println("---" + photoIds);
-		
+
 		photo.setAlbum(albumDAO.getAlbumById(albumId));
 
 		PhotoDAO photoDao = PhotoDAO.getInstance();
 		photoDao.update(photo);
-		
+
 		ResponseBuilder res = new ResponseBuilderImpl();
 		res.status(200);
 		return res.build();
+
+	}
+	
+	@GET
+	@Path("/{albumId}/photos")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response getAllPhotos(@PathParam("albumId") int albumId) {
+		ResponseDTO responseDTO = new ResponseDTO();
+
+		try {
+			PhotoList photos = albumBizLogic.getPhotosByAlbumId(albumId);
+			responseDTO.setPayload(photos);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.PHOTOS_ALBUM_FETCHED_SUCCESSFULLY);
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(e.getMessage());
+			e.printStackTrace();
+		}
 		
+		return Utility.getResponse(responseDTO);
 	}
 }

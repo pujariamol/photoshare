@@ -1,7 +1,5 @@
 package com.photoshare;
 
-import java.util.Date;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -14,9 +12,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import com.photoshare.dao.UserDAO;
-import com.photoshare.model.Album;
+import com.photoshare.bizlogic.UserBizLogic;
+import com.photoshare.dto.ResponseDTO;
+import com.photoshare.model.AlbumList;
 import com.photoshare.model.User;
+import com.photoshare.utility.Constants;
+import com.photoshare.utility.Utility;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 
 /**
@@ -28,12 +29,14 @@ import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 @Path("/users")
 public class UserServices {
 
-	private static UserDAO userDAO = UserDAO.getInstance();
+	// private static UserDAO userDAO = UserDAO.getInstance();
+	private static UserBizLogic userBizLogic = new UserBizLogic();
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response addUser(User user) {
-		userDAO.insert(user);
+
+		userBizLogic.createUser(user);
 
 		ResponseBuilder res = new ResponseBuilderImpl();
 		res.status(201);
@@ -46,7 +49,8 @@ public class UserServices {
 	public Response updateUserInfo(User user, @PathParam("userId") int userId) {
 
 		user.setId(userId);
-		userDAO.update(user);
+		userBizLogic.updateUser(user);
+
 		ResponseBuilder res = new ResponseBuilderImpl();
 		res.status(200);
 		return res.build();
@@ -57,7 +61,8 @@ public class UserServices {
 	public Response deletePhoto(@PathParam("userId") int userId) {
 		User user = new User();
 		user.setId(userId);
-		userDAO.delete(user);
+
+		userBizLogic.deleteUser(user);
 
 		ResponseBuilder res = new ResponseBuilderImpl();
 		res.status(200);
@@ -67,9 +72,59 @@ public class UserServices {
 	@GET
 	@Path("/{userId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public User getUser(@PathParam("userId") int userId) {
-		User user = userDAO.getUserById(userId);
-		return user;
+	public Response getUser(@PathParam("userId") int userId) {
+		ResponseDTO responseDTO = new ResponseDTO();
+		try {
+			userBizLogic.getUserById(userId);
+			responseDTO.setMessage(Constants.USER_FETCHED_SUCCESSFULLY);
+			responseDTO.setSuccess(true);
+		} catch (Exception e) {
+			responseDTO.setMessage(e.getMessage());
+			responseDTO.setSuccess(false);
+		}
+
+		return Utility.getResponse(responseDTO);
+
+	}
+
+	@GET
+	@Path("/{userId}/albums")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAllAlbums(@PathParam("userId") int userId) {
+		ResponseDTO responseDTO = new ResponseDTO();
+
+		try {
+			AlbumList albums = userBizLogic.getAlbumsByUserId(userId);
+			responseDTO.setPayload(albums);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.USER_ALBUMS_FETCHED_SUCCESSFULLY);
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(e.getMessage());
+			e.printStackTrace();
+		}
+		return Utility.getResponse(responseDTO);
+	}
+
+	@POST
+	@Path("/login")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getLogin(User user) {
+		ResponseDTO responseDTO = new ResponseDTO();
+
+		user = userBizLogic.getUserByCredentials(user.getEmailId(),
+				user.getPassword());
+
+		if (null == user) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(Constants.USER_DOES_NOT_EXISTS);
+		} else {
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage("Welcome " + user.getFirstname());
+			responseDTO.setPayload(user);
+		}
+		return Utility.getResponse(responseDTO);
 	}
 
 }
