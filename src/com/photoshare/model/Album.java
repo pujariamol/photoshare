@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 
 
-@XmlRootElement
+@XmlRootElement(name = "album")
 @Entity
 @Table(name = "ALBUM")
 public class Album {
@@ -46,7 +46,7 @@ public class Album {
 
 	@ManyToOne
     @JoinColumn(name="USER_ID")
-    private User ownerId;
+    private User owner;
 
 	public int getId() {
 		return id;
@@ -104,12 +104,13 @@ public class Album {
 		this.photos = photos;
 	}
 
-	public User getOwnerId() {
-		return ownerId;
+	public User getOwner() {
+		return owner;
 	}
 
-	public void setOwnerId(User ownerId) {
-		this.ownerId = ownerId;
+	public void setOwner(User owner) {
+		this.owner = owner;
 	}
+
 
 }
