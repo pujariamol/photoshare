@@ -1,7 +1,11 @@
 package com.photoshare.dao;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
+import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -53,6 +57,20 @@ public class CommonDAO<T, ID extends Serializable> {
 	public T getObject(Class<T> obj, ID id) {
 		T result = (T) getSession().get(obj, id);
 		return result;
+	}
+
+	public List<T> getObjectByQuery(String query, Map<String,?> nameValueBean ) {
+		Query q = getSession().createQuery(query);
+		
+		for(String columnName : nameValueBean.keySet()){
+			q.setParameter(columnName, nameValueBean.get(columnName));
+		}
+		
+		return q.list();
+	}
+
+	public Criteria getCriteriaInstance(Class<T> obj) {
+		return getSession().createCriteria(obj);
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.photoshare.dao;
 
+import org.hibernate.Criteria;
+
 import javassist.tools.rmi.ObjectNotFoundException;
 
 import com.photoshare.model.Album;
@@ -48,5 +50,9 @@ public class AlbumDAO extends CommonDAO<Album, Integer> {
 					+ " id does not exists!!");
 		}
 		delete(album);
+	}
+
+	public Criteria getCriteriaInstance() {
+		return getCriteriaInstance(Album.class);
 	}
 }
