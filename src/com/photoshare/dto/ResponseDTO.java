@@ -1,17 +1,27 @@
 package com.photoshare.dto;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+
 import org.json.JSONObject;
+
+import com.photoshare.model.Album;
+import com.photoshare.model.AlbumList;
+import com.photoshare.model.PhotoList;
+import com.photoshare.model.User;
 
 /**
  * @author Amol
- *
+ * 
  */
-
-
+@XmlRootElement
+@XmlSeeAlso({ User.class, Album.class, AlbumList.class, PhotoList.class})
 public class ResponseDTO {
 
-	private boolean success = false;
+	private boolean success = true;
 	private String message = "";
+	// private int status = 500;
+	private Object payload = null;
 
 	public ResponseDTO() {
 
@@ -44,6 +54,14 @@ public class ResponseDTO {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public Object getPayload() {
+		return payload;
+	}
+
+	public void setPayload(Object payload) {
+		this.payload = payload;
 	}
 
 	@Override
