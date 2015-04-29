@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement
 @Entity
@@ -29,9 +30,12 @@ public class User {
 	@Column(name = "EMAILID")
 	private String emailId;
 
-	@OneToMany(mappedBy="ownerId")
+	@Column(name = "PASSWORD")
+	private String password;
+
+	@OneToMany(mappedBy = "owner")
 	private List<Album> albums;
-	
+
 	public int getId() {
 		return id;
 	}
@@ -64,12 +68,21 @@ public class User {
 		this.emailId = emailId;
 	}
 
+	@XmlTransient
 	public List<Album> getAlbums() {
 		return albums;
 	}
 
 	public void setAlbums(List<Album> albums) {
 		this.albums = albums;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 }
