@@ -15,5 +15,11 @@ public class Utility {
 		return res.build();
 	}
 
+	public static Response getResponse(ResponseDTO responseDTO,int responseCode) {
+		ResponseBuilder res = new  ResponseBuilderImpl();
+		res.status(responseDTO.isSuccess()?responseCode:500);
+		res.entity(responseDTO);
+		return res.build();
+	}
 	
 }
