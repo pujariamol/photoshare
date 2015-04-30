@@ -1,5 +1,7 @@
 package com.photoshare.dao;
 
+import org.hibernate.Criteria;
+
 import com.photoshare.model.Comment;
 
 /**
@@ -25,4 +27,8 @@ public class CommentDAO extends CommonDAO<Comment, Integer> {
 		return instance;
 	}
 
+	public Criteria getCriteriaInstance() {
+		return getCriteriaInstance(Comment.class);
+	}
+	
 }

@@ -1,5 +1,7 @@
 package com.photoshare.dao;
 
+import org.hibernate.Criteria;
+
 import com.photoshare.model.AlbumSharedUsers;
 
 public class AlbumSharedUsersDAO extends CommonDAO<AlbumSharedUsers, Integer> {
@@ -17,7 +19,9 @@ public class AlbumSharedUsersDAO extends CommonDAO<AlbumSharedUsers, Integer> {
 		return instance;
 	}
 	
-	
+	public Criteria getCriteriaInstance() {
+		return getCriteriaInstance(AlbumSharedUsers.class);
+	}
 	
 	
 }
