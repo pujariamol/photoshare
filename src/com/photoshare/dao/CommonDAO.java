@@ -26,21 +26,28 @@ import com.photoshare.db.HibernateUtil;
  *            type integer but can change if required
  */
 public class CommonDAO<T, ID extends Serializable> {
-
+	
+	private static Session session = null;
+	
 	private Session getSession() {
-		HibernateUtil hibernateUtil = new HibernateUtil();
-		SessionFactory sessionFactory = hibernateUtil.getSessionFactory();
-		return sessionFactory.openSession();
+		if(session == null){
+			HibernateUtil hibernateUtil = new HibernateUtil();
+			SessionFactory sessionFactory = hibernateUtil.getSessionFactory();
+			session = sessionFactory.openSession();	
+		}
+		return session;
 	}
 
+	
 	public void insert(T obj) {
+		
 		Session session = getSession();
 		Transaction tx = session.beginTransaction();
 		session.save(obj);
 		tx.commit();
 	}
 
-	public void update(T obj) {
+	public void update(T obj) {	
 		Session session = getSession();
 		Transaction tx = session.beginTransaction();
 		session.update(obj);
@@ -59,7 +66,7 @@ public class CommonDAO<T, ID extends Serializable> {
 		return result;
 	}
 
-	public List<T> getObjectByQuery(String query, Map<String,?> nameValueBean ) {
+	public List<?> getObjectByQuery(String query, Map<String,?> nameValueBean ) {
 		Query q = getSession().createQuery(query);
 		
 		for(String columnName : nameValueBean.keySet()){
