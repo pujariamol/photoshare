@@ -1,5 +1,7 @@
 package com.photoshare;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -14,10 +16,12 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.photoshare.bizlogic.UserBizLogic;
 import com.photoshare.dto.ResponseDTO;
-import com.photoshare.model.AlbumList;
+import com.photoshare.model.Comment;
 import com.photoshare.model.User;
 import com.photoshare.utility.Constants;
 import com.photoshare.utility.Utility;
+import com.photoshare.wrappers.AlbumList;
+import com.photoshare.wrappers.FriendList;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 
 /**
@@ -29,18 +33,26 @@ import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 @Path("/users")
 public class UserServices {
 
-	// private static UserDAO userDAO = UserDAO.getInstance();
 	private static UserBizLogic userBizLogic = new UserBizLogic();
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response addUser(User user) {
+		ResponseDTO responseDTO = new ResponseDTO();
 
-		userBizLogic.createUser(user);
+		try {
+			userBizLogic.createUser(user);
+			responseDTO.setPayload(user);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.USER_CREATED_SUCCESSFULLY);
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(e.getMessage());
+			e.printStackTrace();
+		}
 
-		ResponseBuilder res = new ResponseBuilderImpl();
-		res.status(201);
-		return res.build();
+		return Utility.getResponse(responseDTO, 201);
 	}
 
 	@PUT
@@ -59,14 +71,18 @@ public class UserServices {
 	@DELETE
 	@Path("/{userId}")
 	public Response deletePhoto(@PathParam("userId") int userId) {
-		User user = new User();
-		user.setId(userId);
+		ResponseDTO responseDTO = new ResponseDTO();
 
-		userBizLogic.deleteUser(user);
-
-		ResponseBuilder res = new ResponseBuilderImpl();
-		res.status(200);
-		return res.build();
+		try {
+			userBizLogic.deleteUser(userId);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.USER_DELETE_SUCCESSFULLY);
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(Constants.USER_DOES_NOT_FOUND);
+			e.printStackTrace();
+		}
+		return Utility.getResponse(responseDTO, 204);
 	}
 
 	@GET
@@ -94,7 +110,7 @@ public class UserServices {
 		ResponseDTO responseDTO = new ResponseDTO();
 
 		try {
-			AlbumList albums = userBizLogic.getAlbumsByUserId(userId);
+			AlbumList albums = userBizLogic.getAllAlbumsByUserId(userId);
 			responseDTO.setPayload(albums);
 			responseDTO.setSuccess(true);
 			responseDTO.setMessage(Constants.USER_ALBUMS_FETCHED_SUCCESSFULLY);
@@ -112,19 +128,71 @@ public class UserServices {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getLogin(User user) {
 		ResponseDTO responseDTO = new ResponseDTO();
-
-		user = userBizLogic.getUserByCredentials(user.getEmailId(),
-				user.getPassword());
-
-		if (null == user) {
-			responseDTO.setSuccess(false);
-			responseDTO.setMessage(Constants.USER_DOES_NOT_EXISTS);
-		} else {
+		try {
+			user = userBizLogic.getUserByCredentials(user.getEmailId(),
+					user.getPassword());
 			responseDTO.setSuccess(true);
 			responseDTO.setMessage("Welcome " + user.getFirstname());
 			responseDTO.setPayload(user);
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(Constants.USER_DOES_NOT_EXISTS);
+			System.out.println("-----" +responseDTO.getMessage() + "-----");
+			e.printStackTrace();
 		}
+
 		return Utility.getResponse(responseDTO);
+	}
+
+	@GET
+	@Path("/{userId}/friends")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getFriendsList(@PathParam("userId") int userId) {
+		ResponseDTO responseDTO = new ResponseDTO();
+
+		try {
+			FriendList friendList = new FriendList();
+			List<String> frndsList = userBizLogic.getFriendsByUserId(userId);
+			String[] frndArr = new String[frndsList.size()];
+
+			frndArr = frndsList.toArray(frndArr);
+			friendList.setFriendEmailIds(frndArr);
+
+			responseDTO.setPayload(friendList);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.FRIENDS_LIST_FETCHED_SUCCESSFULLY);
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		return Utility.getResponse(responseDTO);
+	}
+
+	@POST
+	@Path("/{userId}/photos/{photoId}/comments/")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response addComment(@PathParam("photoId") int photoId,
+			@PathParam("userId") int userId, String commentStr) {
+
+		ResponseDTO responseDTO = new ResponseDTO();
+		try {
+
+			Comment comment = userBizLogic.addCommentToPhoto(userId, photoId,
+					commentStr);
+
+			responseDTO.setPayload(comment);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.COMMENT_SAVED_SUCCESSFULLY);
+			
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(e.getMessage());
+			e.printStackTrace();
+		}
+		return Utility.getResponse(responseDTO, 201);
 	}
 
 }

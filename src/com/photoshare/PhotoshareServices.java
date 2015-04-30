@@ -1,20 +1,19 @@
 package com.photoshare;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
-import com.photoshare.dao.AlbumDAO;
-import com.photoshare.dao.AlbumSharedUsersDAO;
-import com.photoshare.dao.UserDAO;
-import com.photoshare.model.Album;
-import com.photoshare.model.AlbumSharedUsers;
-import com.photoshare.model.User;
-import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
+import com.photoshare.bizlogic.PhotoshareServiceBizLogic;
+import com.photoshare.dto.ResponseDTO;
+import com.photoshare.utility.Constants;
+import com.photoshare.utility.Utility;
 
 /**
  * @author Amol
@@ -24,36 +23,82 @@ import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 @Path("/photoshare")
 public class PhotoshareServices {
 
-	private static AlbumDAO albumDAO = AlbumDAO.getInstance();
-	private static UserDAO userDAO = UserDAO.getInstance();
-	private static AlbumSharedUsersDAO albumSharedUsersDAO = AlbumSharedUsersDAO.getInstance();
+	PhotoshareServiceBizLogic photoserviceBizLogic = new PhotoshareServiceBizLogic();
 
+	/**
+	 * 
+	 * friendEmailIds : amol@gmail.com,mahesh@gmail.com
+	 * 
+	 * @param albumId
+	 * @param friendEmailIds
+	 * @return
+	 */
 	@PUT
-	@Path("/albums/{albumId}/users/{userId}")
-	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/albums/{albumId}/friends/")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response shareAlbum(@PathParam("albumId") int albumId,
-			@PathParam("userId") int userId, AlbumSharedUsers albumSharedUsers) {
-		User user = userDAO.getUserById(userId);
-		Album album = albumDAO.getAlbumById(albumId);
-		
-		if(null == albumSharedUsers )
-			albumSharedUsers = new AlbumSharedUsers();
-		
-		albumSharedUsers.setUser(user);
-		albumSharedUsers.setAlbum(album);
-		
-		albumSharedUsersDAO.insert(albumSharedUsers);
-		
-		ResponseBuilder res = new ResponseBuilderImpl();
-		res.status(200);
-		return res.build();
+			String friendEmailIds) {
+		ResponseDTO responseDTO = new ResponseDTO();
+
+		try {
+			photoserviceBizLogic.shareAlbumToUsers(albumId,
+					friendEmailIds.split(","));
+			responseDTO.setMessage(Constants.USERS_ADDED_TO_ALBUM);
+			responseDTO.setSuccess(true);
+		} catch (Exception e) {
+			responseDTO.setMessage(e.getMessage());
+			responseDTO.setSuccess(false);
+			e.printStackTrace();
+		}
+
+		return Utility.getResponse(responseDTO);
 	}
 
 	@PUT
-	@Path("/revoke/albums/{albumId}/users/{userIds}")
-	public void revokeAlbum(@PathParam("albumId") int albumId,
-			@PathParam("userIds") String userIds) {
+	@Path("/revoke/albums/{albumId}/friends")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response revokeAlbum(@PathParam("albumId") int albumId,
+			String friendEmailIds) {
+		ResponseDTO responseDTO = new ResponseDTO();
+
+		try {
+			photoserviceBizLogic.revokeUsersFromAlbum(albumId,
+					friendEmailIds.split(","));
+			responseDTO.setMessage(Constants.USERS_REMOVED_FROM_ALBUM);
+			responseDTO.setSuccess(true);
+		} catch (Exception e) {
+			responseDTO.setMessage(e.getMessage());
+			responseDTO.setSuccess(false);
+			e.printStackTrace();
+		}
+
+		return Utility.getResponse(responseDTO);
 
 	}
 
+	@GET
+	@Path("/")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getPhotosBySearchText(@QueryParam("searchTxt") String searchTxt){
+		ResponseDTO responseDTO = new ResponseDTO();
+
+		try {
+			photoserviceBizLogic.getPhotosBySearchText(searchTxt);
+//			responseDTO.setMessage(Constants.USERS_REMOVED_FROM_ALBUM);
+			responseDTO.setSuccess(true);
+		} catch (Exception e) {
+			responseDTO.setMessage(e.getMessage());
+			responseDTO.setSuccess(false);
+			e.printStackTrace();
+		}
+
+		return Utility.getResponse(responseDTO);
+	}
+	
+	
+	
+	
+	
 }

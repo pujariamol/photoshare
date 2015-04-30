@@ -14,7 +14,6 @@ import java.util.UUID;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -29,11 +28,15 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.json.JSONException;
 
 import com.photoshare.bizlogic.AlbumBizLogic;
+import com.photoshare.bizlogic.CommentBizLogic;
+import com.photoshare.bizlogic.PhotoBizLogic;
 import com.photoshare.dao.PhotoDAO;
 import com.photoshare.dto.ResponseDTO;
 import com.photoshare.model.Album;
-import com.photoshare.model.Comment;
 import com.photoshare.model.PhotoMeta;
+import com.photoshare.utility.Constants;
+import com.photoshare.utility.Utility;
+import com.photoshare.wrappers.CommentList;
 import com.sun.jersey.api.client.ClientResponse.Status;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
@@ -48,18 +51,22 @@ import com.sun.jersey.multipart.FormDataParam;
 @Path("/photos")
 public class PhotoServices {
 
+	/**
+	 * 
+	 */
+
 	private final String uploadFileHomeLocation = "C:/photoshareImages/";
 
 	private PhotoDAO photoDAO = PhotoDAO.getInstance();
+	private static PhotoBizLogic photoBizLogic = new PhotoBizLogic();
 
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response addPhoto(
 			@FormDataParam("file") InputStream uploadedInputStream,
-			@FormDataParam("file") FormDataContentDisposition fileDetail,@QueryParam("albumId") int albumId) {
+			@FormDataParam("file") FormDataContentDisposition fileDetail,
+			@QueryParam("albumId") int albumId) {
 
-		System.out.println("--------------------------------------"+ albumId);
-		
 		String uniqueFileName = UUID.randomUUID() + "."
 				+ fileDetail.getFileName().split("\\.")[1];
 		String uploadedFileLocation = uploadFileHomeLocation + uniqueFileName;
@@ -72,11 +79,11 @@ public class PhotoServices {
 		photo.setLocation(uploadedFileLocation);
 		photo.setURL(uploadedFileLocation);
 		photo.setDescription(fileDetail.getFileName().split("\\.")[0]);
-		
+
 		Album album = new AlbumBizLogic().getAlbumById(albumId);
-		
+
 		photo.setAlbum(album);
-		
+
 		photoDAO.insert(photo);
 
 		// save file to disk
@@ -155,34 +162,36 @@ public class PhotoServices {
 		return Response.status(200).entity(responseObj.toString()).build();
 	}
 
+	/**
+	 * @param photoId
+	 * @return
+	 */
 	@DELETE
 	@Path("/{photoId}")
-	public Response deletePhoto(@PathParam("photoId") String uniqueFileName) {
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deletePhoto(@PathParam("photoId") int photoId) {
 
-		PhotoMeta rPhoto = photoDAO.getPhotoById(1);
+		ResponseDTO responseDTO = new ResponseDTO();
 
-		photoDAO.delete(rPhoto);
-
-		// form JSON response message
-		org.json.JSONObject responseObj = new org.json.JSONObject();
 		try {
-			responseObj.put("success", true);
-			responseObj.put("response-code", "200");
-			responseObj.put("message", "File deleted successfully..");
-
-		} catch (JSONException e) {
-			return Response.status(200).build();
+			photoBizLogic.deletePhotos(photoId);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.PHOTO_DELETE_SUCCESSFULLY);
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(Constants.PHOTO_DOES_NOT_FOUND);
+			e.printStackTrace();
 		}
-
-		return Response.status(200).entity(responseObj.toString()).build();
+		return Utility.getResponse(responseDTO, 204);
 	}
 
 	@GET
 	@Path("/{photoId}")
 	@Produces("image/*")
-	public Response getPhoto(@PathParam("photoId") String image) {
+	public Response getPhoto(@PathParam("photoId") int photoId) {
 
-		File f = new File(uploadFileHomeLocation + image);
+		PhotoMeta photoMetaData = photoBizLogic.getPhotoById(photoId);
+		File f = new File(photoMetaData.getURL());
 
 		org.json.JSONObject responseObj = new org.json.JSONObject();
 
@@ -196,7 +205,6 @@ public class PhotoServices {
 			} catch (JSONException e) {
 				return Response.status(Status.NOT_FOUND).build();
 			}
-
 		}
 
 		try {
@@ -206,19 +214,29 @@ public class PhotoServices {
 		}
 	}
 
-	
-	@POST
-	@Path("/{photoId}/comments/")
-	public Response addComment(@PathParam("photoId") int photoId, Comment comment){
-		
-		comment.setPhoto(photoDAO.getPhotoById(photoId));
-	
-			
-		ResponseBuilder res = new ResponseBuilderImpl();
-		res.status(201);
-		return res.build();
+	@GET
+	@Path("/{photoId}/comments")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getCommentsByPhotoId(@PathParam("photoId") int photoId) {
+		ResponseDTO responseDTO = new ResponseDTO();
+		CommentBizLogic commentBizLogic = new CommentBizLogic();
+		CommentList commentList = new CommentList();
+
+		try {
+			commentList.setComments(commentBizLogic
+					.getCommentsByPhotoId(photoId));
+			responseDTO.setPayload(commentList);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.COMMENTS_FETCHED_SUCCESSFULLY);
+
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		return Utility.getResponse(responseDTO);
 	}
-	
 
 	// save uploaded file to new location
 	private void writeToFile(InputStream uploadedInputStream,

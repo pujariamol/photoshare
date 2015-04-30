@@ -4,8 +4,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 
-import javassist.tools.rmi.ObjectNotFoundException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -23,10 +21,10 @@ import com.photoshare.dao.AlbumDAO;
 import com.photoshare.dao.PhotoDAO;
 import com.photoshare.dto.ResponseDTO;
 import com.photoshare.model.Album;
-import com.photoshare.model.PhotoList;
 import com.photoshare.model.PhotoMeta;
 import com.photoshare.utility.Constants;
 import com.photoshare.utility.Utility;
+import com.photoshare.wrappers.PhotoList;
 import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 
 /**
@@ -37,6 +35,10 @@ import com.sun.jersey.core.spi.factory.ResponseBuilderImpl;
 @Path("/albums")
 public class AlbumServices {
 
+	/**
+	 * 
+	 */
+	
 	private static AlbumDAO albumDAO = AlbumDAO.getInstance();
 	private static AlbumBizLogic albumBizLogic = new AlbumBizLogic();
 
@@ -52,7 +54,7 @@ public class AlbumServices {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createAlbum(Album album) {
-
+		System.out.println("Inside Create album");
 		ResponseDTO responseDTO = new ResponseDTO();
 		ResponseBuilder res = new ResponseBuilderImpl();
 
@@ -60,7 +62,7 @@ public class AlbumServices {
 			albumBizLogic.createAlbum(album);
 			responseDTO.setMessage(Constants.ALBUM_CREATED_SUCCESS);
 			responseDTO.setSuccess(true);
-
+			responseDTO.setPayload(album);
 			URI createdURI = new URI("/albums/" + album.getId());
 			res.contentLocation(createdURI);
 		} catch (URISyntaxException e) {
@@ -73,9 +75,7 @@ public class AlbumServices {
 			e.printStackTrace();
 		}
 
-		res.status(responseDTO.isSuccess() ? 201 : 500);
-		res.entity(responseDTO);
-		return res.build();
+		return Utility.getResponse(responseDTO,201);
 	}
 
 	@PUT
@@ -100,20 +100,18 @@ public class AlbumServices {
 	@DELETE
 	@Path("/{albumId}")
 	public Response deleteAlbum(@PathParam("albumId") int albumId) {
-		ResponseBuilder res = new ResponseBuilderImpl();
-
-		Album album = new Album();
-		album.setId(albumId);
+		ResponseDTO responseDTO = new ResponseDTO();
+		
 		try {
-			albumDAO.deleteAlbum(album);
-			res.status(204);
-		} catch (ObjectNotFoundException e) {
-			res.status(400);
-			res.entity(new ResponseDTO(false, Constants.ALBUM_NOT_FOUND));
+			albumBizLogic.deleteAlbum(albumId);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.ALBUM_DELETE_SUCCESSFULLY);
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(Constants.ALBUM_NOT_FOUND);
 			e.printStackTrace();
 		}
-		res.type(MediaType.APPLICATION_JSON);
-		return res.build();
+		return Utility.getResponse(responseDTO,204);
 	}
 
 	@GET
@@ -141,9 +139,6 @@ public class AlbumServices {
 	public Response addPhotoToAlbum(@PathParam("albumId") int albumId,
 			@PathParam("photoIds") String photoIds, PhotoMeta photo) {
 
-		System.out.println("--- " + photo.getName());
-		System.out.println("---" + photoIds);
-
 		photo.setAlbum(albumDAO.getAlbumById(albumId));
 
 		PhotoDAO photoDao = PhotoDAO.getInstance();
@@ -158,6 +153,7 @@ public class AlbumServices {
 	@GET
 	@Path("/{albumId}/photos")
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAllPhotos(@PathParam("albumId") int albumId) {
 		ResponseDTO responseDTO = new ResponseDTO();
 
