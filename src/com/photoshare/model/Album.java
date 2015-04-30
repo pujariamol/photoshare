@@ -13,8 +13,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
-
-
 @XmlRootElement(name = "album")
 @Entity
 @Table(name = "ALBUM")
@@ -41,12 +39,15 @@ public class Album {
 	private String coverPhotoURL;
 
 	@OneToMany(mappedBy = "album")
-	//@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+	// @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
 	private List<PhotoMeta> photos;
 
 	@ManyToOne
-    @JoinColumn(name="USER_ID")
-    private User owner;
+	@JoinColumn(name = "OWNER_ID")
+	private User owner;
+
+	@Column(name = "STATUS")
+	private String status;
 
 	public int getId() {
 		return id;
@@ -112,5 +113,12 @@ public class Album {
 		this.owner = owner;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
 }

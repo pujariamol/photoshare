@@ -27,7 +27,7 @@ public class User {
 	@Column(name = "LAST_NAME")
 	private String lastname;
 
-	@Column(name = "EMAILID")
+	@Column(name = "EMAILID", unique = true)
 	private String emailId;
 
 	@Column(name = "PASSWORD")
@@ -35,6 +35,9 @@ public class User {
 
 	@OneToMany(mappedBy = "owner")
 	private List<Album> albums;
+
+	@Column(name = "STATUS")
+	private String status;
 
 	public int getId() {
 		return id;
@@ -83,6 +86,14 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 }

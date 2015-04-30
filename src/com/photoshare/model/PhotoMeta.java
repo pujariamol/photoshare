@@ -10,35 +10,39 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @XmlRootElement
 @Entity
-@Table(name="PHOTO_METADATA")
+@Table(name = "PHOTO_METADATA")
 public class PhotoMeta {
 
 	@Id
 	@GeneratedValue
-	@Column(name="ID")
+	@Column(name = "ID")
 	private int id;
-	
-	@Column(name="NAME")
+
+	@Column(name = "NAME")
 	private String name;
-	
-	@Column(name="DESCRIPTION")
+
+	@Column(name = "DESCRIPTION")
 	private String description;
-	
-	@Column(name="LOCATION")
+
+	@Column(name = "LOCATION")
 	private String location;
-	
-	@Column(name="DATE")
+
+	@Column(name = "DATE")
 	private Date date;
-	
-	@Column(name="URL")
+
+	@Column(name = "URL")
 	private String URL;
 
 	@ManyToOne
-    @JoinColumn(name="ALBUM_ID")
-    private Album album;
+	@JoinColumn(name = "ALBUM_ID")
+	private Album album;
+
+	@Column(name = "STATUS")
+	private String status;
 
 	public int getId() {
 		return id;
@@ -88,6 +92,7 @@ public class PhotoMeta {
 		URL = uRL;
 	}
 
+	@XmlTransient
 	public Album getAlbum() {
 		return album;
 	}
@@ -95,6 +100,14 @@ public class PhotoMeta {
 	public void setAlbum(Album album) {
 		this.album = album;
 	}
-	
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 	
 }

@@ -33,6 +33,9 @@ public class AlbumSharedUsers {
 	@JoinColumn(name = "USER_ID")
 	private User user;
 
+	@Column(name = "STATUS")
+	private String status;
+	
 	public int getId() {
 		return id;
 	}
@@ -73,4 +76,14 @@ public class AlbumSharedUsers {
 		this.user = user;
 	}
 
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	
+	
 }
