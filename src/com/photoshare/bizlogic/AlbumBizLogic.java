@@ -9,15 +9,18 @@ import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Restrictions;
 
 import com.photoshare.dao.AlbumDAO;
+import com.photoshare.dao.AlbumSharedUsersDAO;
 import com.photoshare.dto.ResponseDTO;
 import com.photoshare.model.Album;
-import com.photoshare.model.AlbumList;
-import com.photoshare.model.PhotoList;
+import com.photoshare.model.AlbumSharedUsers;
 import com.photoshare.model.PhotoMeta;
 import com.photoshare.model.User;
 import com.photoshare.utility.Constants;
+import com.photoshare.wrappers.AlbumList;
+import com.photoshare.wrappers.PhotoList;
 
 public class AlbumBizLogic {
+	
 	private static AlbumDAO albumDAO = AlbumDAO.getInstance();
 
 	/**
@@ -31,11 +34,27 @@ public class AlbumBizLogic {
 		criteria.add(Restrictions.eq("owner.id", userId));
 		albums = criteria.list();
 
-		System.out.println(albums);
-
 		return albums;
 	}
 
+	
+	/**
+	 * @param userId
+	 * @return
+	 */
+	public List<Album> getSharedAlbumsByUserId(int userId){
+		List<Album> albums = new ArrayList<Album>();
+		
+		Criteria criteria = AlbumSharedUsersDAO.getInstance().getCriteriaInstance();
+		criteria.add(Restrictions.eq("user.id", userId));
+		List<AlbumSharedUsers> albumSharedUsers = criteria.list();
+		for(AlbumSharedUsers albumSharedUser : albumSharedUsers){
+			albums.add(albumSharedUser.getAlbum());
+		}
+		
+		return albums;
+	}
+	
 	/**
 	 * 
 	 * @param album
@@ -48,8 +67,9 @@ public class AlbumBizLogic {
 	}
 
 	public PhotoList getPhotosByAlbumId(int albumId) {
-
-		return (PhotoList) new PhotoBizLogic().getPhotosByAlbumId(albumId);
+		PhotoList photoList = new PhotoList();
+		photoList.setPhotos(getAlbumById(albumId).getPhotos());
+		return photoList;
 
 	}
 	
@@ -57,4 +77,17 @@ public class AlbumBizLogic {
 		Album album = albumDAO.getAlbumById(albumId);
 		return album;
 	}
+
+
+	/**
+	 * @param albumId
+	 */
+	public void deleteAlbum(int albumId) {
+		Album album = albumDAO.getAlbumById(albumId);
+		album.setStatus(Constants.DISABLED);
+		albumDAO.update(album);
+	}
+
+	
+	
 }
