@@ -6,16 +6,21 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import org.json.JSONObject;
 
 import com.photoshare.model.Album;
-import com.photoshare.model.AlbumList;
-import com.photoshare.model.PhotoList;
+import com.photoshare.model.Comment;
+import com.photoshare.model.PhotoMeta;
 import com.photoshare.model.User;
+import com.photoshare.wrappers.AlbumList;
+import com.photoshare.wrappers.CommentList;
+import com.photoshare.wrappers.FriendList;
+import com.photoshare.wrappers.PhotoList;
 
 /**
  * @author Amol
  * 
  */
 @XmlRootElement
-@XmlSeeAlso({ User.class, Album.class, AlbumList.class, PhotoList.class})
+@XmlSeeAlso({ User.class, Album.class, AlbumList.class, PhotoList.class,
+		FriendList.class, Comment.class,CommentList.class,PhotoMeta.class })
 public class ResponseDTO {
 
 	private boolean success = true;
