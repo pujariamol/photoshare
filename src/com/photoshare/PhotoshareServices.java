@@ -1,7 +1,8 @@
 package com.photoshare;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -12,8 +13,10 @@ import javax.ws.rs.core.Response;
 
 import com.photoshare.bizlogic.PhotoshareServiceBizLogic;
 import com.photoshare.dto.ResponseDTO;
+import com.photoshare.model.PhotoMeta;
 import com.photoshare.utility.Constants;
 import com.photoshare.utility.Utility;
+import com.photoshare.wrappers.PhotoList;
 
 /**
  * @author Amol
@@ -35,12 +38,11 @@ public class PhotoshareServices {
 	 */
 	@PUT
 	@Path("/albums/{albumId}/friends/")
-	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response shareAlbum(@PathParam("albumId") int albumId,
-			String friendEmailIds) {
+			@QueryParam("friendEmailIds") String friendEmailIds) {
 		ResponseDTO responseDTO = new ResponseDTO();
-
+		
 		try {
 			photoserviceBizLogic.shareAlbumToUsers(albumId,
 					friendEmailIds.split(","));
@@ -60,7 +62,7 @@ public class PhotoshareServices {
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response revokeAlbum(@PathParam("albumId") int albumId,
-			String friendEmailIds) {
+			@QueryParam("friendEmailIds") String friendEmailIds) {
 		ResponseDTO responseDTO = new ResponseDTO();
 
 		try {
@@ -78,15 +80,24 @@ public class PhotoshareServices {
 
 	}
 
-	@GET
-	@Path("/")
+	@PUT
+	@Path("/search")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getPhotosBySearchText(@QueryParam("searchTxt") String searchTxt){
+	public Response getPhotosBySearchText(
+			@QueryParam("searchTxt") String searchTxt,
+			@QueryParam("albumIds") String albumIds) {
+
+		// TODO use userid for checkin the user rights on the album
+
 		ResponseDTO responseDTO = new ResponseDTO();
 
 		try {
-			photoserviceBizLogic.getPhotosBySearchText(searchTxt);
-//			responseDTO.setMessage(Constants.USERS_REMOVED_FROM_ALBUM);
+			List<PhotoMeta> photos = photoserviceBizLogic
+					.getPhotosBySearchText(searchTxt, albumIds);
+			PhotoList photoList = new PhotoList();
+			photoList.setPhotos(photos);
+			responseDTO.setPayload(photoList);
+			responseDTO.setMessage(Constants.SEARCH_COMPLETE);
 			responseDTO.setSuccess(true);
 		} catch (Exception e) {
 			responseDTO.setMessage(e.getMessage());
@@ -96,9 +107,5 @@ public class PhotoshareServices {
 
 		return Utility.getResponse(responseDTO);
 	}
-	
-	
-	
-	
-	
+
 }
