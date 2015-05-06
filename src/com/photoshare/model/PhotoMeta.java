@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.ws.rs.DefaultValue;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -42,6 +43,7 @@ public class PhotoMeta {
 	private Album album;
 
 	@Column(name = "STATUS")
+	@DefaultValue("ACTIVE")
 	private String status;
 
 	public int getId() {

@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.ws.rs.DefaultValue;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "album")
@@ -47,6 +48,7 @@ public class Album {
 	private User owner;
 
 	@Column(name = "STATUS")
+	@DefaultValue("ACTIVE")
 	private String status;
 
 	public int getId() {
