@@ -150,6 +150,10 @@ public class AlbumServices {
 
 	}
 	
+	/**
+	 * @param albumId
+	 * @return
+	 */
 	@GET
 	@Path("/{albumId}/photos")
 	@Consumes(MediaType.APPLICATION_JSON)
