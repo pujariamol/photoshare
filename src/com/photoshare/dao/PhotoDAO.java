@@ -1,6 +1,10 @@
 package com.photoshare.dao;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
+
 import com.photoshare.model.PhotoMeta;
+import com.photoshare.utility.Constants;
 
 /**
  * @author Amol
@@ -26,8 +30,26 @@ public class PhotoDAO extends CommonDAO<PhotoMeta, Integer> {
 		return instance;
 	}
 
+	
+	/**
+	 * Returns the Photos with the given Id
+	 * included deleted photos
+	 * 
+	 * @param id
+	 * @return PhotoMeta
+	 */
 	public PhotoMeta getPhotoById(int id) {
 		return getObject(PhotoMeta.class, id);
 	}
 
+	public Criteria getCriteriaForActiveRecords() {
+		Criteria criteria = getCriteriaInstance();
+		criteria.add(Restrictions.ne(Constants.STATUS, Constants.DISABLED));
+		return criteria;
+	}
+	
+	
+	public Criteria getCriteriaInstance() {
+		return getCriteriaInstance(PhotoMeta.class);
+	}
 }

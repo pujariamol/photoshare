@@ -1,8 +1,13 @@
 package com.photoshare.dao;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
+
 import javassist.tools.rmi.ObjectNotFoundException;
 
+import com.photoshare.model.PhotoMeta;
 import com.photoshare.model.User;
+import com.photoshare.utility.Constants;
 
 /**
  * @author Amol
@@ -28,10 +33,28 @@ public class UserDAO extends CommonDAO<User, Integer> {
 	}
 	
 	
+	/**
+	 * Returns the User with the given Id
+	 * included deleted users
+	 * 
+	 * @param id
+	 * @return user
+	 */
 	public User getUserById(int id) {
 		return getObject(User.class, id);
 	}
 	
+	
+	public Criteria getCriteriaForActiveRecords() {
+		Criteria criteria = getCriteriaInstance();
+		criteria.add(Restrictions.ne(Constants.STATUS, Constants.DISABLED));
+		return criteria;
+	}
+	
+	
+	public Criteria getCriteriaInstance() {
+		return getCriteriaInstance(User.class);
+	}
 
 	public void deleteUser(User user) throws ObjectNotFoundException {
 		int id = user.getId();
