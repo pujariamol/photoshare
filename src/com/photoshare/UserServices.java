@@ -10,12 +10,14 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.photoshare.bizlogic.UserBizLogic;
 import com.photoshare.dto.ResponseDTO;
+import com.photoshare.model.Album;
 import com.photoshare.model.Comment;
 import com.photoshare.model.User;
 import com.photoshare.utility.Constants;
@@ -110,8 +112,12 @@ public class UserServices {
 		ResponseDTO responseDTO = new ResponseDTO();
 
 		try {
-			AlbumList albums = userBizLogic.getAllAlbumsByUserId(userId);
-			responseDTO.setPayload(albums);
+
+			AlbumList albumList = new AlbumList();
+			List<Album> albums = userBizLogic.getAllAlbumsByUserId(userId);
+			albumList.setAlbums(albums);
+
+			responseDTO.setPayload(albumList);
 			responseDTO.setSuccess(true);
 			responseDTO.setMessage(Constants.USER_ALBUMS_FETCHED_SUCCESSFULLY);
 		} catch (Exception e) {
@@ -137,7 +143,6 @@ public class UserServices {
 		} catch (Exception e) {
 			responseDTO.setSuccess(false);
 			responseDTO.setMessage(Constants.USER_DOES_NOT_EXISTS);
-			System.out.println("-----" +responseDTO.getMessage() + "-----");
 			e.printStackTrace();
 		}
 
@@ -186,13 +191,33 @@ public class UserServices {
 			responseDTO.setPayload(comment);
 			responseDTO.setSuccess(true);
 			responseDTO.setMessage(Constants.COMMENT_SAVED_SUCCESSFULLY);
-			
+
 		} catch (Exception e) {
 			responseDTO.setSuccess(false);
 			responseDTO.setMessage(e.getMessage());
 			e.printStackTrace();
 		}
 		return Utility.getResponse(responseDTO, 201);
+	}
+
+	@GET
+	@Path("/{userId}/invite")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response inviteFriend(@QueryParam("emailId") String friendEmailId,
+			@PathParam("userId") int userId) {
+		ResponseDTO responseDTO = new ResponseDTO();
+
+		try {
+			userBizLogic.sendInvite(userId, friendEmailId);
+			responseDTO.setSuccess(true);
+			responseDTO.setMessage(Constants.USER_INVITED_SUCCESSFULLY);
+		} catch (Exception e) {
+			responseDTO.setSuccess(false);
+			responseDTO.setMessage(e.getMessage());
+			e.printStackTrace();
+		}
+
+		return Utility.getResponse(responseDTO);
 	}
 
 }
