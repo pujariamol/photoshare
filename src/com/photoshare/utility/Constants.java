@@ -33,6 +33,16 @@ public class Constants {
 	public static final String PHOTO_DOES_NOT_FOUND = "Photo does not exist!";
 	public static final String USER_DELETE_SUCCESSFULLY =  "User delete successfully!";
 	public static final String USER_DOES_NOT_FOUND = "Photo does not exist!";
+	public static final String WELCOME_MSG_SUBJECT = "Welcome to Mirage!!";
+	public static final String ALBUM_SHARED_MSG_SUBJECT = "Your friend shared an album with you on Mirage!!";
+	
+	public static final String STATUS = "status";
+	public static final String ID = "id";
+	public static final String APP_DOWNLOAD_URL = "https://www.mirage.com/download?os='android'";
+	public static final String SEARCH_COMPLETE = "Search completed!!";
+	public static final String USER_INVITED_SUCCESSFULLY = "Invitation Sent!!";
+	public static final String INVITATION_SENT_SUBJECT = "Invitation to join the most awesome photosharing app : MIRAGE";
+	
 	
 	
 }
