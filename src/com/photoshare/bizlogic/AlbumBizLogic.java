@@ -5,56 +5,49 @@ import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Restrictions;
 
 import com.photoshare.dao.AlbumDAO;
 import com.photoshare.dao.AlbumSharedUsersDAO;
-import com.photoshare.dto.ResponseDTO;
 import com.photoshare.model.Album;
 import com.photoshare.model.AlbumSharedUsers;
-import com.photoshare.model.PhotoMeta;
-import com.photoshare.model.User;
 import com.photoshare.utility.Constants;
-import com.photoshare.wrappers.AlbumList;
 import com.photoshare.wrappers.PhotoList;
 
 public class AlbumBizLogic {
-	
+
 	private static AlbumDAO albumDAO = AlbumDAO.getInstance();
 
 	/**
+	 * Returns list of albums
+	 * 
 	 * @param userId
-	 * @return
+	 * @return List<Album>
 	 */
 	public List<Album> getAlbumsByUserId(int userId) {
-		List<Album> albums = new ArrayList<Album>();
-
-		Criteria criteria = albumDAO.getCriteriaInstance();
+		Criteria criteria = albumDAO.getCriteriaForActiveRecords();
 		criteria.add(Restrictions.eq("owner.id", userId));
-		albums = criteria.list();
-
-		return albums;
+		return criteria.list();
 	}
 
-	
 	/**
 	 * @param userId
 	 * @return
 	 */
-	public List<Album> getSharedAlbumsByUserId(int userId){
+	public List<Album> getSharedAlbumsByUserId(int userId) {
 		List<Album> albums = new ArrayList<Album>();
-		
-		Criteria criteria = AlbumSharedUsersDAO.getInstance().getCriteriaInstance();
+
+		Criteria criteria = AlbumSharedUsersDAO.getInstance()
+				.getCriteriaInstance();
 		criteria.add(Restrictions.eq("user.id", userId));
 		List<AlbumSharedUsers> albumSharedUsers = criteria.list();
-		for(AlbumSharedUsers albumSharedUser : albumSharedUsers){
+		for (AlbumSharedUsers albumSharedUser : albumSharedUsers) {
 			albums.add(albumSharedUser.getAlbum());
 		}
-		
+
 		return albums;
 	}
-	
+
 	/**
 	 * 
 	 * @param album
@@ -66,18 +59,22 @@ public class AlbumBizLogic {
 		albumDAO.insert(album);
 	}
 
+	/**
+	 * @param albumId
+	 * @return
+	 */
 	public PhotoList getPhotosByAlbumId(int albumId) {
 		PhotoList photoList = new PhotoList();
 		photoList.setPhotos(getAlbumById(albumId).getPhotos());
 		return photoList;
 
 	}
-	
-	public Album getAlbumById(int albumId) {
-		Album album = albumDAO.getAlbumById(albumId);
-		return album;
-	}
 
+	public Album getAlbumById(int albumId) {
+		Criteria criteria = albumDAO.getCriteriaForActiveRecords();
+		criteria.add(Restrictions.eq("id", albumId));
+		return (Album) criteria.list().get(0);
+	}
 
 	/**
 	 * @param albumId
@@ -88,6 +85,4 @@ public class AlbumBizLogic {
 		albumDAO.update(album);
 	}
 
-	
-	
 }

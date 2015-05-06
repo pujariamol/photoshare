@@ -17,7 +17,8 @@ import com.photoshare.model.Comment;
 import com.photoshare.model.PhotoMeta;
 import com.photoshare.model.User;
 import com.photoshare.utility.Constants;
-import com.photoshare.wrappers.AlbumList;
+import com.photoshare.utility.EmailModule;
+import com.photoshare.utility.Utility;
 
 /**
  * @author Amol
@@ -29,17 +30,18 @@ public class UserBizLogic {
 
 	/**
 	 * @param userId
-	 * @return
+	 * @return User
 	 */
 	public User getUserById(int userId) {
-		User user = userDAO.getUserById(userId);
-		return user;
+		Criteria criteria = userDAO.getCriteriaForActiveRecords();
+		criteria.add(Restrictions.eq(Constants.ID, userId));
+		return (User) criteria.list().get(0);
 	}
 
 	/**
 	 * @param emailId
 	 * @return
-	 * @throws ObjectNotFoundException 
+	 * @throws ObjectNotFoundException
 	 */
 	public User getUserByEmailId(String emailId) {
 
@@ -48,7 +50,7 @@ public class UserBizLogic {
 
 		List<User> users = (List<User>) userDAO.getObjectByQuery(
 				"from User as u where u.emailId = :emailId", nameValueBean);
-		
+
 		return users.get(0);
 	}
 
@@ -74,7 +76,6 @@ public class UserBizLogic {
 		userDAO.update(user);
 	}
 
-	
 	public List<String> getFriendsByUserId(int userId) {
 		AlbumSharedUsersBizLogic albumSharedUsersBizLogic = new AlbumSharedUsersBizLogic();
 		return albumSharedUsersBizLogic.getFriends(userId);
@@ -84,17 +85,17 @@ public class UserBizLogic {
 	 * @param userId
 	 * @param photoId
 	 * @param commentStr
-	 * @return 
+	 * @return
 	 */
 	public Comment addCommentToPhoto(int userId, int photoId, String commentStr) {
 		PhotoBizLogic photoBizLogic = new PhotoBizLogic();
 		PhotoMeta photo = photoBizLogic.getPhotoById(photoId);
-		
+
 		Comment comment = new Comment();
 		comment.setPhoto(photo);
 		comment.setUser(getUserById(userId));
 		comment.setComment(commentStr);
-		
+
 		CommentDAO.getInstance().insert(comment);
 		return comment;
 	}
@@ -103,19 +104,16 @@ public class UserBizLogic {
 	 * @param userId
 	 * @return
 	 */
-	public AlbumList getAllAlbumsByUserId(int userId) {
+	public List<Album> getAllAlbumsByUserId(int userId) {
 		List<Album> albums = new ArrayList<Album>();
 		List<Album> sharedAlbums = new ArrayList<Album>();
-		
+
 		albums = new AlbumBizLogic().getAlbumsByUserId(userId);
 		sharedAlbums = new AlbumBizLogic().getSharedAlbumsByUserId(userId);
 
 		albums.addAll(sharedAlbums);
-		
-		AlbumList albumList = new AlbumList();
-		albumList.setAlbums(albums);
-		
-		return albumList;
+
+		return albums;
 	}
 
 	/**
@@ -127,5 +125,15 @@ public class UserBizLogic {
 		userDAO.update(user);
 	}
 
+	/**
+	 * @param userId
+	 * @param friendEmailId
+	 */
+	public void sendInvite(int userId, String friendEmailId) {
+		User user = getUserById(userId);
+		String body = Utility.sendInvite(friendEmailId, user);
+		EmailModule.sendEmail(friendEmailId, body,
+				Constants.INVITATION_SENT_SUBJECT);
+	}
 
 }

@@ -1,5 +1,6 @@
 package com.photoshare.bizlogic;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javassist.tools.rmi.ObjectNotFoundException;
@@ -10,8 +11,11 @@ import org.hibernate.criterion.Restrictions;
 import com.photoshare.dao.AlbumSharedUsersDAO;
 import com.photoshare.model.Album;
 import com.photoshare.model.AlbumSharedUsers;
+import com.photoshare.model.PhotoMeta;
 import com.photoshare.model.User;
 import com.photoshare.utility.Constants;
+import com.photoshare.utility.EmailModule;
+import com.photoshare.utility.Utility;
 
 /**
  * @author Amol
@@ -19,10 +23,10 @@ import com.photoshare.utility.Constants;
  */
 public class PhotoshareServiceBizLogic {
 
-	
 	private static AlbumSharedUsersDAO albumSharedUsersDAO = AlbumSharedUsersDAO
 			.getInstance();
 	private static AlbumSharedUsersBizLogic albumSharedUsersBizLogic = new AlbumSharedUsersBizLogic();
+
 	/**
 	 * @param albumId
 	 * @param friendEmailIds
@@ -37,14 +41,23 @@ public class PhotoshareServiceBizLogic {
 
 		for (String emailId : friendEmailIds) {
 			User user = null;
+			String body = null;
+			String subject = null;
 			try {
 				user = userBizLogic.getUserByEmailId(emailId);
+				body = Utility.createShareAlbumMsg(album, user);
+				subject = Constants.ALBUM_SHARED_MSG_SUBJECT;
 			} catch (IndexOutOfBoundsException e) {
 				user = new User();
 				user.setEmailId(emailId);
-				// TODO send email to this email id for invitation
 				userBizLogic.createUser(user);
+
+				body = Utility.createWelcomeMsgBody(album.getOwner(),
+						album.getName());
+				subject = Constants.WELCOME_MSG_SUBJECT;
+
 			}
+			EmailModule.sendEmail(emailId, body, subject);
 
 			if (!isSharedAlbum(user.getId(), album.getId())) {
 				AlbumSharedUsers albumSharedUsers = new AlbumSharedUsers();
@@ -74,8 +87,6 @@ public class PhotoshareServiceBizLogic {
 
 	public void revokeUsersFromAlbum(int albumId, String[] friendEmailIds) {
 
-		
-
 		for (String emailId : friendEmailIds) {
 			Criteria asuCriteria = albumSharedUsersDAO
 					.getCriteriaInstance(AlbumSharedUsers.class);
@@ -83,7 +94,7 @@ public class PhotoshareServiceBizLogic {
 			asuCriteria.add(Restrictions.eq("album.id", albumId));
 			asuCriteria.add(Restrictions.eq("friendsEmailId", emailId));
 			List<AlbumSharedUsers> asuList = asuCriteria.list();
-			
+
 			if (!asuList.isEmpty()) {
 				albumSharedUsersBizLogic.revokeAccess(asuList.get(0));
 			}
@@ -94,10 +105,23 @@ public class PhotoshareServiceBizLogic {
 
 	/**
 	 * @param searchTxt
+	 * @param userId
 	 */
-	public void getPhotosBySearchText(String searchTxt) {
+	public List<PhotoMeta> getPhotosBySearchText(String searchTxt,
+			String strAlbumIds) {
 		
+		PhotoBizLogic photoBizLogic = new PhotoBizLogic();
+		String[] strAlbums = strAlbumIds.split(",");
+
+		List<Integer> albumIds = new ArrayList<Integer>();
+
+		for (String albumId : strAlbums) {
+			albumIds.add(Integer.valueOf(albumId));
+		}
+
+		List<PhotoMeta> photos = photoBizLogic.getPhotosInAllAlbumById(albumIds, searchTxt);
 		
+		return photos;
 	}
 
 }
