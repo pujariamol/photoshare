@@ -1,4 +1,4 @@
-#Mirage
+# Mirage
 ## Android based photo sharing app
 
 This is backend for an Android based photo sharing app.
